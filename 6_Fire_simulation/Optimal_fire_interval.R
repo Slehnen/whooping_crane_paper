@@ -1,23 +1,22 @@
 library(zoo)
-library(raster)
+library(terra)
 library(DescTools)
-library(rgdal)
 library(sf)
 library(ggplot2)
 library(ggthemes)
 library(reshape)
+library(dplyr)
 
 recent <- c(0, 30, 365, 365*2, 365*3, 365*4, 5*365, 365*7, 365*10, 365*15, 365*20)
 
 #############################################################################
-######## Tatton #############################################################
+######## Fire #############################################################
 #############################################################################
 
-raster_list <- paste("meta_habitat_suit_", "tatton", "_", recent,"_new.tif", sep ="")
+raster_list <- paste("habitat_suit_", "all", "_", recent,".tif", sep ="")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame(as.points(raster_stack))
 
 id <- order(recent)
 
@@ -42,10 +41,10 @@ out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
 r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
-writeRaster(r, "meta_tatton_optimal_fire_frequency.tiff", format="GTiff", overwrite=TRUE)
+writeRaster(r, "meta_all_optimal_fire_frequency.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-tatton <- readOGR(dsn=getwd(), layer="tatton_fire_units")
+tatton <- st_read("tatton_fire_units.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -55,7 +54,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, tatton,  df=TRUE)
+ex <- terra::extract(r, tatton,  df=TRUE)
 names(ex)[2] <- "value"
 tatton$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 
@@ -64,7 +63,7 @@ plot(tatton, col = tatton$fire_freq)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-ex <- raster::extract(r, tatton,  df=TRUE)
+ex <- terra::extract(r, tatton,  df=TRUE)
 names(ex)[2] <- "value"
 mean1 <- function(x) {
   x <- na.omit(x)
@@ -75,11 +74,9 @@ tatton$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(tatton, col = tatton$range*100)
 
-st_write(st_as_sf(tatton), paste0(getwd(), "/", "meta_tatton_fire_freq_optimal.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(tatton), paste0(getwd(), "/", "meta_tatton_fire_freq_optimal_12_14_2023.shp"), delete_layer = TRUE) 
 
-
-
-ex2 <- raster::extract(raster_stack, tatton,  df=TRUE)
+ex2 <- terra::extract(raster_stack, tatton,  df=TRUE)
 names(ex2) <- c("ID", recent/365)
 ex2$site <- paste("tatton", ex2$ID, sep="_")
 
@@ -89,9 +86,9 @@ ex2$site <- paste("tatton", ex2$ID, sep="_")
 
 raster_list <- paste("meta_habitat_suit_","matagorda", "_", recent,"_new.tif", sep ="")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame(as.points(raster_stack))
+
 
 id <- order(recent)
 
@@ -116,10 +113,10 @@ out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
 r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
-writeRaster(r, "meta_matagorda_optimal_fire_frequency.tiff", format="GTiff", overwrite=TRUE)
+writeRaster(r, "meta_matagorda_optimal_fire_frequency.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-matagorda <- readOGR(dsn=getwd(), layer="matagorda_fire_units")
+matagorda <- st_read("matagorda_fire_units.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -130,7 +127,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, matagorda,  df=TRUE)
+ex <- terra::extract(r, matagorda,  df=TRUE)
 names(ex)[2] <- "value"
 matagorda$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 
@@ -139,7 +136,7 @@ plot(matagorda, col = matagorda$fire_freq*100)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-ex <- raster::extract(r, matagorda,  df=TRUE)
+ex <- terra::extract(r, matagorda,  df=TRUE)
 names(ex)[2] <- "value"
 mean1 <- function(x) {
   x <- na.omit(x)
@@ -150,9 +147,9 @@ matagorda$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(matagorda, col = matagorda$range*100)
 
-st_write(st_as_sf(matagorda), paste0(getwd(), "/", "meta_matagorda_fire_freq_optimal.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(matagorda), paste0(getwd(), "/", "meta_matagorda_fire_freq_optimal_12_14_2023.shp"), delete_layer = TRUE) 
 
-ex3 <- raster::extract(raster_stack, matagorda,  df=TRUE)
+ex3 <- terra::extract(raster_stack, matagorda,  df=TRUE)
 names(ex3) <- c("ID", recent/365)
 ex3$site <- paste("matagorda", ex3$ID, sep="_")
 
@@ -162,9 +159,9 @@ ex3$site <- paste("matagorda", ex3$ID, sep="_")
 
 raster_list <- paste("habitat_suit_aransas_south", "_", recent,"_new.tif", sep ="")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame( as.points(raster_stack) )
+
 
 out <- matrix(ncol = length(id), nrow = dim(y)[1], data = NA)
 for(i in 3:(length(id))){
@@ -186,11 +183,11 @@ out2$Largest_Column <- colnames(out2)[apply(out2,1,which.max)]
 out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
-r[!is.na(r)] <- out2$Largest_Column
-writeRaster(r, "meta_south_aransas_optimal_fire_frequency_new2.tiff", format="GTiff", overwrite=TRUE)
+r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
+writeRaster(r, "meta_south_aransas_optimal_fire_frequency_new5.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-south_aransas <- readOGR(dsn=getwd(), layer="Aransas_south")
+south_aransas <- st_read("Aransas_south.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -200,7 +197,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, south_aransas,  df=TRUE)
+ex <- terra::extract(r, south_aransas,  df=TRUE)
 names(ex)[2] <- "value"
 south_aransas$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 south_aransas$fire_freq[is.na(south_aransas$fire_freq)] <- 0
@@ -210,9 +207,7 @@ plot(south_aransas, col = south_aransas$fire_freq)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-
-
-ex <- raster::extract(r, south_aransas,  df=TRUE)
+ex <- terra::extract(r, south_aransas,  df=TRUE)
 names(ex)[2] <- "value"
 ex$value[is.na(ex$value)] <- 0
 
@@ -225,9 +220,9 @@ south_aransas$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(south_aransas, col = south_aransas$range*100)
 
-st_write(st_as_sf(south_aransas), paste0(getwd(), "/", "meta_south_aransas_fire_freq_optimal_new2.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(south_aransas), paste0(getwd(), "/", "meta_south_aransas_fire_freq_optimal_12_14_2023_new2.shp"), delete_layer = TRUE) 
 
-ex4 <- raster::extract(raster_stack, south_aransas,  df=TRUE)
+ex4 <- terra::extract(raster_stack, south_aransas,  df=TRUE)
 names(ex4) <- c("ID", recent/365)
 ex4$site <- paste("south_aransas", ex4$ID, sep="_")
 
@@ -237,9 +232,9 @@ ex4$site <- paste("south_aransas", ex4$ID, sep="_")
 
 raster_list <- paste("meta_habitat_suit_aransas_north", "_", recent,"_new.tif", sep ="")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame( as.points(raster_stack) )
+
 
 out <- matrix(ncol = length(id), nrow = dim(y)[1], data = NA)
 for(i in 3:(length(id))){
@@ -262,10 +257,10 @@ out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
 r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
-writeRaster(r, "meta_north_aransas_optimal_fire_frequency.tiff", format="GTiff", overwrite=TRUE)
+writeRaster(r, "meta_north_aransas_optimal_fire_frequency.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-north_aransas <- readOGR(dsn=getwd(), layer="aransas_north_units")
+north_aransas <- st_read("aransas_north_units.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -275,7 +270,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, north_aransas,  df=TRUE)
+ex <- terra::extract(r, north_aransas,  df=TRUE)
 names(ex)[2] <- "value"
 north_aransas$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 
@@ -285,7 +280,7 @@ plot(north_aransas, col = north_aransas$fire_freq)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-ex <- raster::extract(r, north_aransas,  df=TRUE)
+ex <- terra::extract(r, north_aransas,  df=TRUE)
 names(ex)[2] <- "value"
 mean1 <- function(x) {
   x <- na.omit(x)
@@ -296,9 +291,9 @@ north_aransas$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(north_aransas, col = north_aransas$range*100)
 
-st_write(st_as_sf(north_aransas), paste0(getwd(), "/", "meta_north_aransas_fire_freq_optimal.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(north_aransas), paste0(getwd(), "/", "meta_north_aransas_fire_freq_optimal_12_14_2023.shp"), delete_layer = TRUE) 
 
-ex5 <- raster::extract(raster_stack, north_aransas,  df=TRUE)
+ex5 <- terra::extract(raster_stack, north_aransas,  df=TRUE)
 names(ex5) <- c("ID", recent/365)
 ex5$site <- paste("north_aransas", ex5$ID, sep="_")
 
@@ -308,9 +303,9 @@ ex5$site <- paste("north_aransas", ex5$ID, sep="_")
 
 raster_list <- paste("meta_habitat_suit_aransas_east", "_", recent,"_new.tif", sep ="")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame( as.points(raster_stack) )
+
 
 out <- matrix(ncol = length(id), nrow = dim(y)[1], data = NA)
 for(i in 3:(length(id))){
@@ -333,10 +328,10 @@ out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
 r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
-writeRaster(r, "meta_east_units_optimal_fire_frequency.tiff", format="GTiff", overwrite=TRUE)
+writeRaster(r, "meta_east_units_optimal_fire_frequency.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-east_units <- readOGR(dsn=getwd(), layer="east_units")
+east_units <- st_read("east_units.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -346,7 +341,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, east_units,  df=TRUE)
+ex <- terra::extract(r, east_units,  df=TRUE)
 names(ex)[2] <- "value"
 east_units$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 
@@ -356,7 +351,7 @@ plot(east_units, col = east_units$fire_freq)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-ex <- raster::extract(r, east_units,  df=TRUE)
+ex <- terra::extract(r, east_units,  df=TRUE)
 names(ex)[2] <- "value"
 mean1 <- function(x) {
   x <- na.omit(x)
@@ -367,9 +362,9 @@ east_units$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(east_units, col = east_units$range*100)
 
-st_write(st_as_sf(east_units), paste0(getwd(), "/", "meta_east_units_fire_freq_optimal.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(east_units), paste0(getwd(), "/", "meta_east_units_fire_freq_optimal_12_14_2023.shp"), delete_layer = TRUE) 
 
-ex6 <- raster::extract(raster_stack, east_units,  df=TRUE)
+ex6 <- terra::extract(raster_stack, east_units,  df=TRUE)
 names(ex6) <- c("ID", recent/365)
 ex6$site <- paste("east", ex6$ID, sep="_")
 
@@ -379,9 +374,9 @@ ex6$site <- paste("east", ex6$ID, sep="_")
 
 raster_list <- paste("habitat_suit_leftover_units", "_", recent,"_new.tif", sep ="") 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-raster_stack <- stack(raster_list)
-y <- data.frame( rasterToPoints(raster_stack) )
-y <- y[,3:length(y)]
+raster_stack <- rast(raster_list)
+y <- data.frame( as.points(raster_stack) )
+
 
 out <- matrix(ncol = length(id), nrow = dim(y)[1], data = NA)
 for(i in 3:(length(id))){
@@ -404,10 +399,10 @@ out2$Largest_Column[out2$diff < 0.02] <- 0
 
 r <- raster_stack[[1]]
 r[!is.na(r)] <- as.numeric(as.character(out2$Largest_Column))
-writeRaster(r, "meta_leftover_units_optimal_fire_frequency.tiff", format="GTiff", overwrite=TRUE)
+writeRaster(r, "meta_leftover_units_optimal_fire_frequency.tiff", overwrite=TRUE)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/simulation")
-leftover_units <- readOGR(dsn=getwd(), layer="leftovers")
+leftover_units <- st_read("leftovers.shp")
 
 Mode1 <- function(x) {
   x <- na.omit(x)
@@ -417,7 +412,7 @@ Mode1 <- function(x) {
 
 #extract raster cell count (sum) within each polygon area (poly)
 
-ex <- raster::extract(r, leftover_units,  df=TRUE)
+ex <- terra::extract(r, leftover_units,  df=TRUE)
 names(ex)[2] <- "value"
 leftover_units$fire_freq <- tapply(ex$value, list(ex$ID), Mode1)
 
@@ -427,7 +422,7 @@ plot(leftover_units, col = leftover_units$fire_freq)
 r <- raster_stack[[1]]
 r[!is.na(r)] <- out2$diff
 
-ex <- raster::extract(r, leftover_units,  df=TRUE)
+ex <- terra::extract(r, leftover_units,  df=TRUE)
 names(ex)[2] <- "value"
 mean1 <- function(x) {
   x <- na.omit(x)
@@ -438,9 +433,9 @@ leftover_units$range <- tapply(ex$value, list(ex$ID), mean1)
 
 plot(leftover_units, col = leftover_units$range*100)
 
-st_write(st_as_sf(leftover_units), paste0(getwd(), "/", "meta_leftover_units_fire_freq_optimal.shp"), delete_layer = TRUE) 
+st_write(st_as_sf(leftover_units), paste0(getwd(), "/", "meta_leftover_units_fire_freq_optimal_12_14_2023.shp"), delete_layer = TRUE) 
 
-ex7 <- raster::extract(raster_stack, leftover_units,  df=TRUE)
+ex7 <- terra::extract(raster_stack, leftover_units,  df=TRUE)
 names(ex7) <- c("ID", recent/365)
 ex7$site <- paste("leftover", ex7$ID, sep="_")
 
