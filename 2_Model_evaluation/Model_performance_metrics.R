@@ -1,25 +1,18 @@
-library(vip)
 library(caret)
 library(gbm)
-library("DALEX")
-library("randomForest")
-library(ggplot2)
-library(ggthemes)
-library(dplyr)
-library(forcats)
+library(DALEX)
 library(mltools)
-library(ROCR)
 
 ########################################################
 # Population ###########################################
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("pop_level_meta_model_5_30_23.RDS")
-preProcValues <- readRDS("preProcValues_population_5_30_23.RDS")
-testdata <- readRDS("testTransformed_population_5_30_23.RDS")
-trainTransformed <- readRDS("trainTransformed_population_5_30_23.RDS" )
-data1_trn <- readRDS("untrans_population_5_30_23.RDS")
+meta_model <- readRDS("pop_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_population.RDS")
+testdata <- readRDS("testTransformed_population.RDS")
+trainTransformed <- readRDS("trainTransformed_population.RDS" )
+data1_trn <- readRDS("untrans_population.RDS")
 
 pred_ensemble <- predict(meta_model, testdata)
 pred_ensemble_glm <- predict(meta_model$models$glm, testdata)
@@ -49,23 +42,23 @@ explainer_en <- DALEX::explain(model = meta_model,
                                label = "ensemble",
                                type = "classification")
 explainer_en_glm <- DALEX::explain(model = meta_model$models$glm, 
-                               data = testdata[,-17],
-                               y = y, 
-                               predict_function = pred,
-                               label = "ensemble",
-                               type = "classification")
-explainer_en_rf <- DALEX::explain(model = meta_model$models$rf, 
                                    data = testdata[,-17],
                                    y = y, 
                                    predict_function = pred,
                                    label = "ensemble",
                                    type = "classification")
-explainer_en_xgb <- DALEX::explain(model = meta_model$models$xgbTree, 
+explainer_en_rf <- DALEX::explain(model = meta_model$models$rf, 
                                   data = testdata[,-17],
                                   y = y, 
                                   predict_function = pred,
                                   label = "ensemble",
                                   type = "classification")
+explainer_en_xgb <- DALEX::explain(model = meta_model$models$xgbTree, 
+                                   data = testdata[,-17],
+                                   y = y, 
+                                   predict_function = pred,
+                                   label = "ensemble",
+                                   type = "classification")
 explainer_en_svm <- DALEX::explain(model = meta_model$models$svmRadial, 
                                    data = testdata[,-17],
                                    y = y, 
@@ -110,11 +103,11 @@ c(sedi_fun(pred_ensemble),sedi_fun(pred_ensemble_glm),sedi_fun(pred_ensemble_rf)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("HR_level_meta_model_5_18_2023.RDS")
-preProcValues <- readRDS("preProcValues_HR_5_18_23.RDS")
-data1_trn <- readRDS("data1_trn_HR_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_HR_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
+meta_model <- readRDS("HR_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_HR.RDS")
+data1_trn <- readRDS("data1_trn_HR.RDS")
+testTransformed <- readRDS("testTransformed_HR.RDS")
+trainTransformed <- readRDS("trainTransformed_HR.RDS")
 
 pred_ensemble <- predict(meta_model, testTransformed)
 pred_ensemble_glm <- predict(meta_model$models$glm, testTransformed)
@@ -202,10 +195,10 @@ c(sedi_fun(pred_ensemble),sedi_fun(pred_ensemble_glm),sedi_fun(pred_ensemble_rf)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_ensemble_model_fire_day_5_21_23.RDS")
-preProcValues <- readRDS("preProcValues_within_HR_fire_day_5_21_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_fire_day_5_21_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_fire_day_5_21_23.RDS")
+meta_model <- readRDS("within_HR_level_ensemble_model_fire_day.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_fire_day.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_fire_day.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_fire_day.RDS")
 
 pred_ensemble <- predict(meta_model, testTransformed)
 pred_ensemble_glm <- predict(meta_model$models$glm, testTransformed)
@@ -275,8 +268,8 @@ model_performance(explainer_en_gbm)
 
 
 c(mcc(pred_ensemble, testTransformed$type),mcc(pred_ensemble_glm, testTransformed$type),
-mcc(pred_ensemble_rf, testTransformed$type),mcc(pred_ensemble_svm, testTransformed$type),
-mcc(pred_ensemble_xgb, testTransformed$type),mcc(pred_ensemble_gbm, testTransformed$type))
+  mcc(pred_ensemble_rf, testTransformed$type),mcc(pred_ensemble_svm, testTransformed$type),
+  mcc(pred_ensemble_xgb, testTransformed$type),mcc(pred_ensemble_gbm, testTransformed$type))
 
 sedi_fun <- function(prediction){
   cmen <- confusionMatrix(prediction, testTransformed$type)
@@ -293,11 +286,11 @@ c(sedi_fun(pred_ensemble),sedi_fun(pred_ensemble_glm),sedi_fun(pred_ensemble_rf)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_meta_model_roost_5_18_23.RDS")
+meta_model <- readRDS("within_HR_level_meta_model_roost.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
-preProcValues <- readRDS("preProcValues_within_HR_roosting_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_roosting_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_roosting_5_18_23.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_roosting.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_roosting.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_roosting.RDS")
 
 pred_ensemble <- predict(meta_model, testTransformed)
 pred_ensemble_glm <- predict(meta_model$models$glm, testTransformed)
