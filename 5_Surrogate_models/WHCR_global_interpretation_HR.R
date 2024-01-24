@@ -1,20 +1,14 @@
-library(iml)
-library(caret)
-library(gbm)
-library("ggplot2")
-library(mefa)
-library(randomForest)
 library(rpart)
 library(rpart.plot)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("HR_level_meta_model_5_18_2023.RDS")
-preProcValues <- readRDS("preProcValues_HR_5_18_23.RDS")
-data1_trn <- readRDS("data1_trn_HR_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_HR_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
+meta_model <- readRDS("HR_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_HR.RDS")
+data1_trn <- readRDS("data1_trn_HR.RDS")
+testTransformed <- readRDS("testTransformed_HR.RDS")
+trainTransformed <- readRDS("trainTransformed_HR.RDS")
 
 true_y_data <- data1_trn[,11]
 data1_trn <- data1_trn[,-11]
@@ -69,4 +63,3 @@ setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
 jpeg("HR_explainer_model.jpeg", res = 300, quality = 100, width = 5200, height = 2500)
 rpart.plot(pruned_model, type = 5, clip.right.labs = TRUE, branch = 0.4, under = TRUE, tweak = 1.1, digits = 2)
 dev.off()
-

@@ -1,22 +1,15 @@
-library(iml)
-library(caret)
-library(gbm)
-library("ggplot2")
-library(mefa)
-library(randomForest)
 library(rpart)
 library(rpart.plot)
 
 options(scipen = 999)
 
-
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("pop_level_meta_model_5_30_23.RDS")
-preProcValues <- readRDS("preProcValues_population_5_30_23.RDS")
-testdata <- readRDS("testTransformed_population_5_30_23.RDS")
-traindata <- readRDS("trainTransformed_population_5_30_23.RDS" )
-data1_trn <- readRDS("untrans_population_5_30_23.RDS")
-data.smote <- readRDS("smote_population_5_30_23.RDS")
+meta_model <- readRDS("pop_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_population.RDS")
+testdata <- readRDS("testTransformed_population.RDS")
+traindata <- readRDS("trainTransformed_population.RDS" )
+data1_trn <- readRDS("untrans_population.RDS")
+data.smote <- readRDS("smote_population.RDS")
 traindata <- predict(preProcValues, data1_trn)
 true_y_data <- data1_trn[,17]
 data1_trn <- data1_trn[,-17]
@@ -43,7 +36,6 @@ data1_trn[,8] <- data1_trn[,8]*100
 names(data1_trn)[4] <- "% shrubland (1km)"
 data1_trn[,4] <- data1_trn[,4]*100
 
-
 model_predictions <- 1- (predict(meta_model$models$xgbTree, traindata, type = "prob")[,1])
 plot(traindata$pop_data, model_predictions)
 
@@ -64,11 +56,8 @@ rpart.plot(pruned_model)
 rpart.plot(pruned_model, type = 5, clip.right.labs = TRUE, branch = 0.4, under = TRUE, digits = 2)
 rpart.rules(pruned_model)
 
-
-
 # pruned model is not the same as global explainer
 # global explainer has 0.59 r-square value 
-
 
 y_hat <- predict(pruned_model, data1_trn)
 # r squared
@@ -94,9 +83,7 @@ assignInNamespace("format0", myformat0, ns = "rpart.plot")
 
 #############################################################
 
-
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
 jpeg("population_explainer_model.jpeg", res = 300, quality = 100, width = 5500, height = 3400)
 rpart.plot(pruned_model, type = 5, clip.right.labs = TRUE, branch = 0.4, under = TRUE, tweak = 1.4, digits = 2)
 dev.off()
-

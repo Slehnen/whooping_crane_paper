@@ -1,21 +1,15 @@
-library(iml)
-library(caret)
-library(gbm)
-library("ggplot2")
-library(mefa)
-library(randomForest)
 library(rpart)
 library(rpart.plot)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_ensemble_model_fire_day_5_21_23.RDS")
+meta_model <- readRDS("within_HR_level_ensemble_model_fire_day.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-preProcValues <- readRDS("preProcValues_within_HR_fire_day_5_21_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_fire_day_5_21_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_fire_day_5_21_23.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_fire_day.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_fire_day.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_fire_day.RDS")
 
-data1_trn <- readRDS("trainuntrans_within_HR_fire_day_5_21_23.RDS")
+data1_trn <- readRDS("trainuntrans_within_HR_fire_day.RDS")
 
 names(data1_trn)[15] <- "% salt tidal marsh (50m)"
 data1_trn[,15] <- data1_trn[,15]*100
@@ -60,6 +54,6 @@ y_hat <- predict(global_explainer, data1_trn)
 plot(data1_trn$model_pre, y_hat)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
-jpeg("daytime_explainer_model_6_21_23.jpeg", res = 300, quality = 100, width = 3800, height = 3000)
+jpeg("daytime_explainer_model.jpeg", res = 300, quality = 100, width = 3800, height = 3000)
 rpart.plot(pruned_model, type = 5, clip.right.labs = TRUE, branch = 0.4, under = TRUE, tweak = 1.4, digits = 2)
 dev.off()
