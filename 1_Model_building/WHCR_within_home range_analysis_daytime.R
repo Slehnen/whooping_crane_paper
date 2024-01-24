@@ -1,23 +1,13 @@
-library(raster)
 library(sf)
 library(sp)
-library(boot)
-library(arm)
-library(glmnet)
-library(pscl)
 library(stringr)
-library(pROC)
 library(caret)
 library(caretEnsemble)
 library(gbm)
-library(spatialEco)
 library(lubridate)
 library(suncalc)
 library(stringr)
 library(fastDummies)
-library(spocc)
-library(ROCR)
-library(caTools)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Scripts/Pub_scripts/0_Data")
@@ -139,7 +129,7 @@ head(all_data2)
 #### Separate into training and testing sets by id #######
 ###########################################################
 
-setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Scripts/Pub_scripts/0_Data")
 birds_train <- read.csv("bird_IDS_training.csv")[,2]
 birds_test <- read.csv("bird_IDS_testing.csv")[,2]
 
@@ -212,11 +202,11 @@ testTransformed <- predict(preProcValues, data1_tst)
 dim(trainTransformed)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-saveRDS(preProcValues, "preProcValues_within_HR_fire_day_5_21_23.RDS")
-saveRDS(trainTransformed, "trainTransformed_within_HR_fire_day_5_21_23.RDS")
-saveRDS(testTransformed, "testTransformed_within_HR_fire_day_5_21_23.RDS")
-saveRDS(data1_trn, "trainuntrans_within_HR_fire_day_5_21_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_fire_day_5_21_23.RDS")
+saveRDS(preProcValues, "preProcValues_within_HR_fire_day.RDS")
+saveRDS(trainTransformed, "trainTransformed_within_HR_fire_day.RDS")
+saveRDS(testTransformed, "testTransformed_within_HR_fire_day.RDS")
+saveRDS(data1_trn, "trainuntrans_within_HR_fire_day.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_fire_day.RDS")
 
 my_control <- trainControl(
   method="boot",
@@ -273,8 +263,8 @@ summary(meta_model)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-saveRDS(model_list, "within_HR_level_model_list_day_5_18_23.RDS")
-saveRDS(meta_model, "within_HR_level_ensemble_model_fire_day_5_21_23.RDS")
+saveRDS(model_list, "within_HR_level_model_list_day.RDS")
+saveRDS(meta_model, "within_HR_level_ensemble_model_fire_day.RDS")
 
 model_preds <- lapply(meta_model$models, predict, newdata=testTransformed, type="prob")
 model_preds <- data.frame(model_preds)

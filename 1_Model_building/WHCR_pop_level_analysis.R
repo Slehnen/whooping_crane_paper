@@ -1,31 +1,23 @@
-library(raster)
+library(terra)
 library(sp)
-library(boot)
-library(arm)
-library(glmnet)
-library(pscl)
-library(gbm)
-library(rpart)
 library(caret)
 library(caretEnsemble)
-library(pROC)
-library(ROCR)
-library(foreach)
-library(doParallel)
 library(performanceEstimation)
 
 ######################################################
-##################### Random data generation #########
+##################### read in data  #########
 ######################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Scripts/Pub_scripts/0_Data")
 all_data1 <- readRDS("S1_level_data.RDS")
 
-all_data1 <- all_data1[ , colSums(is.na(all_data1)) < 10000]
-all_data1 <- na.omit(all_data1)
+all_data1 <- all_data1[ , colSums(is.na(all_data1)) < 10000] # remove columns with many NAs
+all_data1 <- na.omit(all_data1) # remove all rows containing missing values
 dim(all_data1)
 all_data1$pop_data <- as.factor(all_data1$pop_data)
 summary(all_data1$pop_data)
+
+### calculate means across years
 
 all_data1$amp_1000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "AMP")==1 & sapply(names(all_data1), grep, pattern = "1000")==1)])
 all_data1$amp_2000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "AMP")==1 & sapply(names(all_data1), grep, pattern = "2000")==1)])
@@ -36,7 +28,6 @@ all_data1$dur_1000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, 
 all_data1$dur_2000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "DUR")==1 & sapply(names(all_data1), grep, pattern = "2000")==1)])
 all_data1$dur_4000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "DUR")==1 & sapply(names(all_data1), grep, pattern = "4000")==1)])
 all_data1$dur_8000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "DUR")==1 & sapply(names(all_data1), grep, pattern = "8000")==1)])
-
 
 all_data1$sosn_1000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "SOSN")==1 & sapply(names(all_data1), grep, pattern = "1000")==1)])
 all_data1$sosn_2000 <- rowMeans(all_data1[, which(sapply(names(all_data1), grep, pattern = "SOSN")==1 & sapply(names(all_data1), grep, pattern = "2000")==1)])
@@ -92,7 +83,6 @@ all_data1$deep_sand_grass_combo_4000 <- all_data1$deep_sand_grass_swale_marsh_40
 all_data1$deep_sand_woody_combo_8000 <- all_data1$deep_sand_shrub_8000 + all_data1$deep_sand_live_oak_8000
 all_data1$pop_data <- as.numeric(as.character(all_data1$pop_data))
 
-
 df.min <- t(sapply(all_data1, range))[,1]
 df.max <- t(sapply(all_data1, range))[,2]
 df.sd <- t(sapply(all_data1, sd))
@@ -101,7 +91,7 @@ df.mean <- t(sapply(all_data1, mean))
 drops <- c("pop_data")
 scale_data <- all_data1[ , !(names(all_data1) %in% drops)]
 
-# Remove year specific variables 
+# Remove variables specific to any given year
 rm <- c(6:61, 185:511)
 scale_data  <- scale_data[, -rm]
 
@@ -217,14 +207,14 @@ boxplot(data.smote[,-(which(names(data.smote) %in% c("pop_data")))], col = "oran
 
 rownames(data.smote) <- NULL
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-saveRDS(preProcValues, "preProcValues_population_5_30_23.RDS")
-saveRDS(trainTransformed, "trainTransformed_population_5_30_23.RDS")
-saveRDS(testTransformed, "testTransformed_population_5_30_23.RDS")
-saveRDS(data1_trn, "untrans_population_5_30_23.RDS")
-saveRDS(data.smote, "smote_population_5_30_23.RDS")
-trainTransformed <- readRDS("trainTransformed_population_5_30_23.RDS")
-data.smote <- readRDS("smote_population_5_30_23.RDS")
-testTransformed <- readRDS("testTransformed_population_5_30_23.RDS")
+saveRDS(preProcValues, "preProcValues_population.RDS")
+saveRDS(trainTransformed, "trainTransformed_population.RDS")
+saveRDS(testTransformed, "testTransformed_population.RDS")
+saveRDS(data1_trn, "untrans_population.RDS")
+saveRDS(data.smote, "smote_population.RDS")
+trainTransformed <- readRDS("trainTransformed_population.RDS")
+data.smote <- readRDS("smote_population.RDS")
+testTransformed <- readRDS("testTransformed_population.RDS")
 
 my_control <- trainControl(
   method="boot",
@@ -273,8 +263,8 @@ meta_model <- caretStack(
   trControl=stackControl
 )
 
-saveRDS(meta_model, "pop_level_meta_model_5_30_23.RDS")
-saveRDS(model_list, "pop_model_list_5_18_23.RDS")
+saveRDS(meta_model, "pop_level_meta_model.RDS")
+saveRDS(model_list, "pop_model_list.RDS")
 # Predict
 model_preds <- lapply(meta_model$models, predict, newdata=testTransformed, type="prob")
 model_preds <- do.call(cbind, model_preds)

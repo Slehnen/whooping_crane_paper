@@ -1,27 +1,13 @@
-library(raster)
-library(rgdal)
+library(sf)
 library(sp)
-library(lme4)
-library(AICcmodavg)
-library(boot)
-library(arm)
-library(glmnet)
-library(pscl)
-library(pROC)
+library(stringr)
+library(caret)
 library(caretEnsemble)
 library(gbm)
-library(sp)
-library(spatialEco)
-library(spocc)
-library(ROCR)
-
-library(sf)
-library(suncalc)
 library(lubridate)
-library(caret)
+library(suncalc)
 library(stringr)
 library(fastDummies)
-library(caTools)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Scripts/Pub_scripts/0_Data")
@@ -140,7 +126,7 @@ all_data2 <- dummy_cols(all_data2,
                         select_columns = "age")
 head(all_data2)
 
-setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Scripts/Pub_scripts/0_Data")
 birds_train <- read.csv("bird_IDS_training.csv")[,2]
 birds_test <- read.csv("bird_IDS_testing.csv")[,2]
 
@@ -212,12 +198,12 @@ testTransformed <- predict(preProcValues, data1_tst)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
-saveRDS(preProcValues, "preProcValues_within_HR_roosting_5_18_23.RDS")
-saveRDS(trainTransformed, "trainTransformed_within_HR_roosting_5_18_23.RDS")
-saveRDS(testTransformed, "testTransformed_within_HR_roosting_5_18_23.RDS")
-saveRDS(data1_trn, "trainuntrans_within_HR_roosting_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_roosting_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_roosting_5_18_23.RDS")
+saveRDS(preProcValues, "preProcValues_within_HR_roosting.RDS")
+saveRDS(trainTransformed, "trainTransformed_within_HR_roosting.RDS")
+saveRDS(testTransformed, "testTransformed_within_HR_roosting.RDS")
+saveRDS(data1_trn, "trainuntrans_within_HR_roosting.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_roosting.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_roosting.RDS")
 
 dim(trainTransformed)
 
@@ -275,8 +261,8 @@ meta_model <- caretStack(
 summary(meta_model)
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-saveRDS(model_list, "within_HR_level_model_list_roost_5_18_23.RDS")
-saveRDS(meta_model, "within_HR_level_meta_model_roost_5_18_23.RDS")
+saveRDS(model_list, "within_HR_level_model_list_roost.RDS")
+saveRDS(meta_model, "within_HR_level_meta_model_roost.RDS")
 
 model_preds <- lapply(meta_model$models, predict, newdata=testTransformed, type="prob")
 model_preds <- data.frame(model_preds)
