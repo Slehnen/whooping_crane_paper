@@ -1,36 +1,18 @@
-library(foreach)
-library(doParallel)
-library(raster)
-library(rgdal)
+library(terra)
 library(sp)
-library(lme4)
-library(AICcmodavg)
-library(boot)
-library(arm)
-library(MASS)
-library(glmnet)
-library(ggplot2)
-library(GGally)
-library(ggthemes)
-library(pscl)
-library(gbm)
-library("rpart")
-library("caretEnsemble")
-library(pROC)
-library(randomForest)
-library(caret)
+library(xgboost)
 
 ######################################################
 ##################### load models#####################
 ######################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("pop_level_meta_model_5_30_23.RDS")
-preProcValues <- readRDS("preProcValues_population_5_30_23.RDS")
-testdata <- readRDS("testTransformed_population_5_30_23.RDS")
-traindata <- readRDS("trainTransformed_population_5_30_23.RDS" )
-data1_trn <- readRDS("untrans_population_5_30_23.RDS")
-data.smote <- readRDS("smote_population_5_30_23.RDS")
+meta_model <- readRDS("pop_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_population.RDS")
+testdata <- readRDS("testTransformed_population.RDS")
+traindata <- readRDS("trainTransformed_population.RDS" )
+data1_trn <- readRDS("untrans_population.RDS")
+data.smote <- readRDS("smote_population.RDS")
 
 ########################################################################
 ##### Spatial prediction ###############################################
@@ -39,7 +21,7 @@ data.smote <- readRDS("smote_population_5_30_23.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/HR_level_and_within_HR_level_rasters_for_prediction_30m")
 
 rasters.l <- list.files(pattern = "\\.tif$") 
-all <- raster::stack(rasters.l)
+all <- rast(rasters.l)
 index <- which(names(all)=="d_data4")
 names(all)[index] <- "d_data"
 index <- which(names(all)=="sorghum__1000")
@@ -61,11 +43,10 @@ xseq <- seq(1695847, 1909157, length.out = 25)
 
 for(i in 1:24){
   print(i)
-  
-  alli <- crop(all, extent(xseq[i], xseq[i+1], 7043218, 7240138))
+  alli <- terra::crop(x = all,y = terra::ext(xseq[i], xseq[i+1], 7043218, 7240138))
   print("crop done")
-  p <- data.frame(rasterToPoints(alli))
-  print("raster to points done")
+  p <- terra::values(alli)
+  p <- data.frame(p)
   #p <- na.omit(p)
   names(p)
   if(dim(p)[1]==0)next
@@ -90,23 +71,18 @@ for(i in 1:24){
     } 
   stopTime=date()
   
-  gcw.mod <- unlist(result.1, use.names = FALSE) # Make list into data frame
-  gcw.mod <- gcw.mod[1:length(p[,1])]
-  gcw.mod1 <- cbind(p[1:length(p[,1]),1:2], gcw.mod) # Combine results with xy coordinates
-  
-  colnames(gcw.mod1) <- c("x", "y", "dens")
-  
-  gcw.mod2 <- rasterFromXYZ(gcw.mod1[,c("x", "y", "dens")]) # Make raster of predicted density
+  template_ras <- alli[[1]]
+  values(template_ras) <- data_out
   
   setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/pop_level_products")
-  writeRaster(gcw.mod2, filename=paste("whcr_pop_6_9_23", i, "_.tif", sep=""),format="GTiff",datatype="FLT4S", overwrite=TRUE)
+  writeRaster(template_ras, filename=paste("whcr_pop", i, "_.tif", sep=""),format="GTiff",datatype="FLT4S", overwrite=TRUE)
 }
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/pop_level_products")
 
 list2 <- list()
 for(i in 1:24){ 
-  rx <- raster(paste("whcr_pop_6_9_23", i, "_.tif", sep=""))
+  rx <- raster(paste("whcr_pop", i, "_.tif", sep=""))
   list2[[i]] <- rx
 }
 
@@ -116,5 +92,5 @@ plot(rast.mosaic, axes = FALSE, legend = TRUE, bty = "n", box = FALSE)
 
 crs(rast.mosaic) <- crs(rx)
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/pop_level_products")
-writeRaster(rast.mosaic, filename = "population_level_prediction_6_9_23.tif",
+writeRaster(rast.mosaic, filename = "population_level_prediction.tif",
             format = "GTiff", datatype="FLT4S", overwrite = TRUE)

@@ -1,25 +1,6 @@
-library(foreach)
-library(doParallel)
-library(raster)
-library(rgdal)
+library(terra)
 library(sp)
-library(lme4)
-library(AICcmodavg)
-library(boot)
-library(arm)
-library(MASS)
-library(glmnet)
-library(ggplot2)
-library(GGally)
-library(ggthemes)
-library(pscl)
-library(gbm)
-library("rpart")
-library("caretEnsemble")
-library(pROC)
-library(randomForest)
-library(caret)
-
+library(xgboost)
 
 ######################################################
 ##################### Random data generation #########
@@ -27,11 +8,11 @@ library(caret)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("HR_level_meta_model_5_18_2023.RDS")
-preProcValues <- readRDS("preProcValues_HR_5_18_23.RDS")
-data1_trn <- readRDS("data1_trn_HR_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_HR_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
+meta_model <- readRDS("HR_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_HR.RDS")
+data1_trn <- readRDS("data1_trn_HR.RDS")
+testTransformed <- readRDS("testTransformed_HR.RDS")
+trainTransformed <- readRDS("trainTransformed_HR.RDS")
 
 
 ########################################################################
@@ -40,7 +21,7 @@ trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/HR_level_and_within_HR_level_rasters_for_prediction_30m")
 rasters.l <- list.files(pattern = "\\.tif$") 
-all <- raster::stack(rasters.l)
+all <- rast(rasters.l)
 
 index <- which(names(all)=="water_500")
 names(all)[index] <- "water_500.2"
@@ -58,15 +39,14 @@ all <- all[[index]]
 
 xseq <- seq(1695847, 1909157, length.out = 25)
 
-for(i in 2:24){
+for(i in 1:24){
   print(i)
-  alli <- crop(all, extent(xseq[i], xseq[i+1], 7043218, 7240138))
+  alli <- terra::crop(x = all,y = terra::ext(xseq[i], xseq[i+1], 7043218, 7240138))
   print("crop done")
-  p <- data.frame(rasterToPoints(alli))
+  p <- terra::values(alli)
+  p <- data.frame(p)
   print("raster to points done")
   if(dim(p)[1]==0)next
-  
-  library(foreach)
   
   chunk1 <- seq(1, length(p[,1]), by=1000)
   startTime=date()
@@ -74,7 +54,6 @@ for(i in 2:24){
     foreach(a=chunk1)%dopar% {
       samp.data <- p[a:(a+999),]
       samp.data <- as.data.frame(samp.data)
-      samp.data <- samp.data[,3:dim(samp.data)[2]]
       samp.data$d_data4 <- median(data1_trn$d_data4)
       samp.data <- predict(preProcValues, samp.data)
       ## NAs cause problems in predictions
@@ -91,24 +70,17 @@ for(i in 2:24){
     } 
   stopTime=date()
   
-  gcw.mod <- unlist(result.1, use.names = FALSE) # Make list into data frame
-  gcw.mod <- gcw.mod[1:length(p[,1])]
-  gcw.mod1 <- cbind(p[1:length(p[,1]),1:2], gcw.mod) # Combine results with xy coordinates
-  
-  colnames(gcw.mod1) <- c("x", "y", "dens")
-  
-  gcw.mod2 <- rasterFromXYZ(gcw.mod1[,c("x", "y", "dens")]) # Make raster of predicted density
+  template_ras <- alli[[1]]
+  values(template_ras) <- data_out
   setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/HR_level_products")
-  #setwd("D:/WHCR_spatial_predictions")
-  writeRaster(gcw.mod2, filename=paste("whcr_HR_6_15_23_", i, "_.tif", sep=""),format="GTiff",datatype="FLT4S", overwrite=TRUE)
-  
+  writeRaster(template_ras, filename=paste("whcr_HR_", i, "_.tif", sep=""),format="GTiff",datatype="FLT4S", overwrite=TRUE)
 }
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/HR_level_products")
 
 list2 <- list()
 for(i in 1:24){ 
-  rx <- raster(paste("whcr_HR_6_15_23_", i, "_.tif", sep=""))
+  rx <- raster(paste("whcr_HR_", i, "_.tif", sep=""))
   list2[[i]] <- rx
 }
 list2$fun   <- max
@@ -117,5 +89,5 @@ plot(rast.mosaic, axes = FALSE, legend = TRUE, bty = "n", box = FALSE)
 
 crs(rast.mosaic) <- crs(rx)
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/HR_level_products")
-writeRaster(rast.mosaic, filename = "HR_level_prediction_7_3_23.tif",
+writeRaster(rast.mosaic, filename = "HR_level_prediction.tif",
             format = "GTiff", datatype="FLT4S", overwrite = TRUE)
