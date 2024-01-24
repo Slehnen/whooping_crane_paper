@@ -1,8 +1,5 @@
-library(vip)
-library(caret)
 library(gbm)
-library("DALEX")
-library("randomForest")
+library(DALEX)
 library(ggplot2)
 library(ggthemes)
 library(dplyr)
@@ -15,11 +12,11 @@ library(forcats)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("pop_level_meta_model_5_30_23.RDS")
-preProcValues <- readRDS("preProcValues_population_5_30_23.RDS")
-testdata <- readRDS("testTransformed_population_5_30_23.RDS")
-trainTransformed <- readRDS("trainTransformed_population_5_30_23.RDS" )
-data1_trn <- readRDS("untrans_population_5_30_23.RDS")
+meta_model <- readRDS("pop_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_population.RDS")
+testdata <- readRDS("testTransformed_population.RDS")
+trainTransformed <- readRDS("trainTransformed_population.RDS" )
+data1_trn <- readRDS("untrans_population.RDS")
 
 y <- testdata$pop_data
 y <- as.character(y)
@@ -45,10 +42,6 @@ explainer_en <- DALEX::explain(model = meta_model,
                                predict_function = pred,
                                label = "ensemble",
                                type = "classification")
-
-
-
-
 
 model_parts_ensemble_pop <- model_parts(explainer_en, type = "variable_importance", variable_groups = grouped_vars,
                                         N = 5000, B = 100)
@@ -118,22 +111,20 @@ ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("HR_level_meta_model_5_18_2023.RDS")
-preProcValues <- readRDS("preProcValues_HR_5_18_23.RDS")
-data1_trn <- readRDS("data1_trn_HR_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_HR_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
+meta_model <- readRDS("HR_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_HR.RDS")
+data1_trn <- readRDS("data1_trn_HR.RDS")
+testTransformed <- readRDS("testTransformed_HR.RDS")
+trainTransformed <- readRDS("trainTransformed_HR.RDS")
 
 drought <- list(c("d_data4"))
 lidar <- list(c("veg_ht_8000"))
 tems <- list(c( "deep_sand_live_oak_marsh_4000", "deep_sand_shrub_2000",
                 "dune_coast_grass_4000",  "salt_tidal_marsh_4000",
-                "salt_tidal_marsh_500"   ))
+                "salt_tidal_marsh_500"))
 phen <- list(c("EOST_4000", "SOSN_4000",  "TIN_4000"))
 
-
 grouped_vars <- c(drought, lidar, tems, phen)
-
 
 y <- testTransformed$type
 y <- as.character(y)
@@ -151,9 +142,6 @@ explainer_en <- DALEX::explain(model = meta_model$models$rf,
                                predict_function = pred,
                                label = "ensemble",
                                type = "classification")
-
-
-
 
 
 model_parts_ensemble_HR <- model_parts(explainer_en, variable_groups = grouped_vars, type = "variable_importance",
@@ -178,7 +166,7 @@ setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
 saveRDS(model_parts_ensemble_HR2, "HR_var_dat_group.RDS")
 saveRDS(model_parts_ensemble_HR, "model_parts_ensemble_HR_group.RDS")
 
-model_parts_ensemble_HR2 <- readRDS("HR_var_dat_group_3_3_23.RDS")
+model_parts_ensemble_HR2 <- readRDS("HR_var_dat_group.RDS")
 model_parts_ensemble_HR <- readRDS("model_parts_ensemble_HR_group.RDS")
 
 ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR)
@@ -188,12 +176,12 @@ ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_meta_model_roost_5_18_23.RDS")
+meta_model <- readRDS("within_HR_level_meta_model_roost.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
-preProcValues <- readRDS("preProcValues_within_HR_roosting_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_roosting_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_roosting_5_18_23.RDS")
-data1_trn <- readRDS("trainuntrans_within_HR_roosting_5_18_23.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_roosting.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_roosting.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_roosting.RDS")
+data1_trn <- readRDS("trainuntrans_within_HR_roosting.RDS")
 
 y <- testTransformed$type
 y <- as.character(y)
@@ -205,8 +193,6 @@ pred <- function(model, newdata)  {
   return(results[,1])
 }
 
-                                  
-                  
 lidar <- list(c("veg_ht_25", "chm_eucdist_3ha_clp"))
 storm <- list(c("surge", "time_elapsed"))
 ccap <- list(c("developed_1000",  "grass_1000", "water_1000", "pal_shrub_wet_500", "grass_125",
@@ -227,10 +213,6 @@ explainer_en <- DALEX::explain(model = meta_model$models$svmRadial,
                                predict_function = pred,
                                label = "ensemble",
                                type = "classification")
-
-
-
-
 
 model_parts_ensemble_roost <- model_parts(explainer_en, type = "variable_importance",
                                        N = 5000, variable_groups = grouped_vars, b = 100)
@@ -264,12 +246,11 @@ ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_ensemble_model_fire_day_5_21_23.RDS")
+meta_model <- readRDS("within_HR_level_ensemble_model_fire_day.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-preProcValues <- readRDS("preProcValues_within_HR_fire_day_5_21_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_fire_day_5_21_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_fire_day_5_21_23.RDS")
-
+preProcValues <- readRDS("preProcValues_within_HR_fire_day.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_fire_day.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_fire_day.RDS")
 
 y <- testTransformed$type
 y <- as.character(y)
@@ -280,7 +261,6 @@ pred <- function(model, newdata)  {
   results <- as.data.frame(predict(model, newdata, type = "prob"))
   return(results[,1])
 }
-                      
 
 lidar <- list(c("chm_eucdist_3ha_clp", "veg_ht_25"))
 storm <- list(c("surge", "time_elapsed"))
@@ -293,7 +273,6 @@ topo <- list(c("barth_dem_25", "tpi_data"))
 fire <- list(c("recent", "freq"))
 season <- list(c("doy"))
 
-
 grouped_vars <- c(lidar, storm, ccap, tems, phen, topo, fire, season)
 
 explainer_en <- DALEX::explain(model = meta_model$models$gbm, 
@@ -302,9 +281,6 @@ explainer_en <- DALEX::explain(model = meta_model$models$gbm,
                                predict_function = pred,
                                label = "ensemble",
                                type = "classification")
-
-
-
 
 
 model_parts_ensemble_day <- model_parts(explainer_en, type = "variable_importance",

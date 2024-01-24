@@ -1,8 +1,5 @@
-library(vip)
-library(caret)
 library(gbm)
-library("DALEX")
-library("randomForest")
+library(DALEX)
 library(dplyr)
 library(forcats)
 library(ggplot2)
@@ -13,11 +10,11 @@ library(ggthemes)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("pop_level_meta_model_5_30_23.RDS")
-preProcValues <- readRDS("preProcValues_population_5_30_23.RDS")
-testdata <- readRDS("testTransformed_population_5_30_23.RDS")
-trainTransformed <- readRDS("trainTransformed_population_5_30_23.RDS" )
-data1_trn <- readRDS("untrans_population_5_30_23.RDS")
+meta_model <- readRDS("pop_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_population.RDS")
+testdata <- readRDS("testTransformed_population.RDS")
+trainTransformed <- readRDS("trainTransformed_population.RDS" )
+data1_trn <- readRDS("untrans_population.RDS")
 
 y <- testdata$pop_data
 y <- as.character(y)
@@ -29,14 +26,12 @@ pred <- function(model, newdata)  {
   return(results[,1])
 }
 
-
 explainer_en <- DALEX::explain(model = meta_model, 
                                data = testdata[,-17],
                                y = y, 
                                predict_function = pred,
                                label = "ensemble",
                                type = "classification")
-
 
 model_parts_ensemble_pop <- model_parts(explainer_en, type = "variable_importance", 
                                         N = 5000, B = 100)
@@ -119,12 +114,11 @@ ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("HR_level_meta_model_5_18_2023.RDS")
-preProcValues <- readRDS("preProcValues_HR_5_18_23.RDS")
-data1_trn <- readRDS("data1_trn_HR_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_HR_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_HR_5_18_23.RDS")
-
+meta_model <- readRDS("HR_level_meta_model.RDS")
+preProcValues <- readRDS("preProcValues_HR.RDS")
+data1_trn <- readRDS("data1_trn_HR.RDS")
+testTransformed <- readRDS("testTransformed_HR.RDS")
+trainTransformed <- readRDS("trainTransformed_HR.RDS")
 
 y <- testTransformed$type
 y <- as.character(y)
@@ -184,12 +178,12 @@ ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR)
 
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_meta_model_roost_5_18_23.RDS")
+meta_model <- readRDS("within_HR_level_meta_model_roost.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work")
-preProcValues <- readRDS("preProcValues_within_HR_roosting_5_18_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_roosting_5_18_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_roosting_5_18_23.RDS")
-data1_trn <- readRDS("trainuntrans_within_HR_roosting_5_18_23.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_roosting.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_roosting.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_roosting.RDS")
+data1_trn <- readRDS("trainuntrans_within_HR_roosting.RDS")
 
 y <- testTransformed$type
 y <- as.character(y)
@@ -260,11 +254,11 @@ ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost)
 ########################################################
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-meta_model <- readRDS("within_HR_level_ensemble_model_fire_day_5_21_23.RDS")
+meta_model <- readRDS("within_HR_level_ensemble_model_fire_day.RDS")
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Work/final_models")
-preProcValues <- readRDS("preProcValues_within_HR_fire_day_5_21_23.RDS")
-testTransformed <- readRDS("testTransformed_within_HR_fire_day_5_21_23.RDS")
-trainTransformed <- readRDS("trainTransformed_within_HR_fire_day_5_21_23.RDS")
+preProcValues <- readRDS("preProcValues_within_HR_fire_day.RDS")
+testTransformed <- readRDS("testTransformed_within_HR_fire_day.RDS")
+trainTransformed <- readRDS("trainTransformed_within_HR_fire_day.RDS")
 
 y <- testTransformed$type
 y <- as.character(y)

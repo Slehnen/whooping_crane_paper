@@ -66,7 +66,7 @@ ggarrange(ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop),
           labels = c("a)", "b)", "c)", "d)"))
 
 setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
-jpeg(filename = "Individual_variable_importance.jpeg", width = 3500, height = 3600,
+jpeg(filename = "Individual_variable_importance.jpeg", width = 4200, height = 3600,
      pointsize = 12, quality = 100, bg = "white", res = 300)
 ggarrange(ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop),
           ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR),
@@ -74,5 +74,29 @@ ggarrange(ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop),
           ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost), 
           ncol = 2, nrow = 2,
           labels = c("a)", "b)", "c)", "d)"))
+dev.off()
+
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
+jpeg(filename = "Pop_level_Individual_variable_importance.jpeg", width = 2100, height = 1800,
+     pointsize = 12, quality = 100, bg = "white", res = 300)
+ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop)
+dev.off()
+
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
+jpeg(filename = "HR_level_Individual_variable_importance.jpeg", width = 2100, height = 1800,
+     pointsize = 12, quality = 100, bg = "white", res = 300)
+ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR)
+dev.off()
+
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
+jpeg(filename = "daytime_level_Individual_variable_importance.jpeg", width = 2100, height = 1800,
+     pointsize = 12, quality = 100, bg = "white", res = 300)
+ggplot_imp(model_parts_ensemble_day2, model_parts_ensemble_day)
+dev.off()
+
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
+jpeg(filename = "roosting_level_Individual_variable_importance.jpeg", width = 2100, height = 1800,
+     pointsize = 12, quality = 100, bg = "white", res = 300)
+ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost)
 dev.off()
 

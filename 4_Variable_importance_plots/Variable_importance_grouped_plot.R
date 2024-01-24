@@ -34,7 +34,7 @@ ggplot_imp <- function(dataframe, model_parts) {
   }
   p +
     theme(legend.position = "none") +
-    theme_few(15)+
+    theme_few(17)+
     labs(x = metric_lab, 
          y = NULL,  fill = NULL,  color = NULL)
 }
@@ -63,16 +63,16 @@ ggarrange(ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop),
           ggplot_imp(model_parts_ensemble_day2, model_parts_ensemble_day),
           ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost), 
           ncol = 2, nrow = 2,
-          labels = c("a)", "b)", "c)", "d)"))
+          labels = c("(a)", "(b)", "(c)", "(d)"))
 
-setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pub")
-jpeg(filename = "Grouped_variable_importance.jpeg", width = 3500, height = 3600,
-     pointsize = 12, quality = 100, bg = "white", res = 300)
+setwd("C:/Users/slehnen/OneDrive - DOI/WHCR/Figures/Figures_for_pubs_final")
+jpeg(filename = "Grouped_variable_importance.jpeg", width = 5625, height = 5400,
+     pointsize = 12, quality = 100, bg = "white", res = 450)
 ggarrange(ggplot_imp(model_parts_ensemble_pop2, model_parts_ensemble_pop),
           ggplot_imp(model_parts_ensemble_HR2, model_parts_ensemble_HR),
           ggplot_imp(model_parts_ensemble_day2, model_parts_ensemble_day),
           ggplot_imp(model_parts_ensemble_roost2, model_parts_ensemble_roost), 
           ncol = 2, nrow = 2,
-          labels = c("a)", "b)", "c)", "d)"))
+          labels = c("(a)", "(b)", "(c)", "(d)"))
 dev.off()
 
